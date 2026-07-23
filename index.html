@@ -94,6 +94,62 @@
             background: rgba(0,0,0,0.5); justify-content: center; align-items: center;
             pointer-events: auto; z-index: 200;
         }
+
+        /* --- Mobile Responsiveness --- */
+        #mobile-dpad {
+            display: none;
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 150px;
+            height: 150px;
+            pointer-events: auto;
+            z-index: 100;
+        }
+        .dpad-btn {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.7);
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            touch-action: none;
+        }
+        .dpad-btn:active { background: rgba(200,200,200,0.9); }
+        #btn-up { top: 0; left: 50px; }
+        #btn-down { bottom: 0; left: 50px; }
+        #btn-left { top: 50px; left: 0; }
+        #btn-right { top: 50px; right: 0; }
+
+        @media (max-width: 768px) {
+            #mobile-dpad { display: block; }
+            #top-left {
+                width: 160px;
+                padding: 10px;
+                top: 10px; left: 10px;
+            }
+            #top-left h2 { font-size: 16px; margin: 0 0 5px 0; }
+            .btn { padding: 6px 8px; font-size: 12px; }
+            #top-right {
+                width: 160px;
+                top: 10px; right: 10px;
+                padding: 10px;
+            }
+            #water-drops-ui {
+                top: auto !important;
+                bottom: 20px !important;
+                left: auto !important;
+                right: 20px !important;
+                transform: scale(0.9);
+                transform-origin: bottom right;
+            }
+        }
     </style>
 </head>
 <body>
@@ -224,6 +280,14 @@
             </div>
         </div>
 
+        <!-- Mobile D-Pad -->
+        <div id="mobile-dpad" class="panel">
+            <div class="dpad-btn" id="btn-up">W</div>
+            <div class="dpad-btn" id="btn-left">A</div>
+            <div class="dpad-btn" id="btn-down">S</div>
+            <div class="dpad-btn" id="btn-right">D</div>
+        </div>
+
         <!-- Auth Modal -->
         <div id="auth-modal" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(135,206,235,0.95); z-index: 9999; display: flex; justify-content: center; align-items: center; pointer-events: auto;">
             <div class="glass" style="padding: 32px; width: 350px; text-align: center;">
@@ -315,6 +379,22 @@
             const k = e.key.toLowerCase();
             if(keys.hasOwnProperty(k)) keys[k] = false;
         });
+
+        // D-Pad Bindings
+        function bindDPad(id, key) {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            const press = (e) => { e.preventDefault(); keys[key] = true; };
+            const release = (e) => { e.preventDefault(); keys[key] = false; };
+            btn.addEventListener('pointerdown', press);
+            btn.addEventListener('pointerup', release);
+            btn.addEventListener('pointerout', release);
+            btn.addEventListener('pointercancel', release);
+        }
+        bindDPad('btn-up', 'w');
+        bindDPad('btn-down', 's');
+        bindDPad('btn-left', 'a');
+        bindDPad('btn-right', 'd');
 
         // --- Tone.js Setup ---
         const synth = new Tone.PolySynth(Tone.Synth, {
