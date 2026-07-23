@@ -57,12 +57,27 @@
         #top-right::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         
         #bottom-center {
+            display: none;
             position: absolute;
-            bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.6); color: white;
-            padding: 8px 24px; border-radius: 20px;
+            top: 70px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: white;
+            padding: 12px 24px; border-radius: 20px;
             font-size: 14px; pointer-events: none;
             text-align: center;
+            z-index: 110;
+        }
+        #btn-guide {
+            position: absolute;
+            top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 105;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ccc;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            pointer-events: auto;
         }
         .btn {
             background: var(--primary); color: white; border: none;
@@ -157,11 +172,11 @@
             #top-right.mobile-open { display: block; }
             
             #water-drops-ui {
-                top: 20px !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                right: auto !important;
-                bottom: auto !important;
+                top: auto !important;
+                bottom: 20px !important;
+                right: 20px !important;
+                left: auto !important;
+                transform: none !important;
             }
         }
     </style>
@@ -297,6 +312,7 @@
         <!-- Mobile UI Toggles -->
         <div class="mobile-toggle" id="btn-toggle-left">👤</div>
         <div class="mobile-toggle" id="btn-toggle-right">🛒</div>
+        <button id="btn-guide">📖 คู่มือ</button>
 
         <!-- Virtual Joystick -->
         <div id="joystick-zone">
@@ -401,6 +417,10 @@
         };
         document.getElementById('btn-toggle-right').onclick = () => {
             document.getElementById('top-right').classList.toggle('mobile-open');
+        };
+        document.getElementById('btn-guide').onclick = () => {
+            const guide = document.getElementById('bottom-center');
+            guide.style.display = guide.style.display === 'block' ? 'none' : 'block';
         };
 
         // Virtual Joystick
