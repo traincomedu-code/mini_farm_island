@@ -380,21 +380,55 @@
             if(keys.hasOwnProperty(k)) keys[k] = false;
         });
 
-        // D-Pad Bindings
-        function bindDPad(id, key) {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            const press = (e) => { e.preventDefault(); keys[key] = true; };
-            const release = (e) => { e.preventDefault(); keys[key] = false; };
-            btn.addEventListener('pointerdown', press);
-            btn.addEventListener('pointerup', release);
-            btn.addEventListener('pointerout', release);
-            btn.addEventListener('pointercancel', release);
+        // Mobile UI Toggles
+        document.getElementById('btn-toggle-left').onclick = () => {
+            document.getElementById('top-left').classList.toggle('mobile-open');
+        };
+        document.getElementById('btn-toggle-right').onclick = () => {
+            document.getElementById('top-right').classList.toggle('mobile-open');
+        };
+
+        // Virtual Joystick
+        const joystickZone = document.getElementById('joystick-zone');
+        const joystickKnob = document.getElementById('joystick-knob');
+        let isDraggingJoystick = false;
+        let joystickCenter = { x: 0, y: 0 };
+        const joystickInput = { x: 0, y: 0 };
+        
+        joystickZone.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            isDraggingJoystick = true;
+            const rect = joystickZone.getBoundingClientRect();
+            joystickCenter = { x: rect.left + rect.width/2, y: rect.top + rect.height/2 };
+            updateJoystick(e);
+        });
+        
+        window.addEventListener('pointermove', (e) => {
+            if(!isDraggingJoystick) return;
+            e.preventDefault();
+            updateJoystick(e);
+        });
+        
+        window.addEventListener('pointerup', () => {
+            if(isDraggingJoystick) {
+                isDraggingJoystick = false;
+                joystickKnob.style.transform = `translate(-50%, -50%)`;
+                joystickInput.x = 0;
+                joystickInput.y = 0;
+            }
+        });
+        
+        function updateJoystick(e) {
+            const dx = e.clientX - joystickCenter.x;
+            const dy = e.clientY - joystickCenter.y;
+            const distance = Math.min(60, Math.hypot(dx, dy));
+            const angle = Math.atan2(dy, dx);
+            const knobX = distance * Math.cos(angle);
+            const knobY = distance * Math.sin(angle);
+            joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+            joystickInput.x = knobX / 60;
+            joystickInput.y = knobY / 60;
         }
-        bindDPad('btn-up', 'w');
-        bindDPad('btn-down', 's');
-        bindDPad('btn-left', 'a');
-        bindDPad('btn-right', 'd');
 
         // --- Tone.js Setup ---
         const synth = new Tone.PolySynth(Tone.Synth, {
@@ -1801,13 +1835,16 @@
                 }
             });
             
-            // WASD Robot Control
+            // WASD & Joystick Robot Control
             if(!quizActive && currentUser) {
                 const input = new THREE.Vector3(0, 0, 0);
                 if(keys.w) input.z -= 1;
                 if(keys.s) input.z += 1;
                 if(keys.a) input.x -= 1;
                 if(keys.d) input.x += 1;
+                
+                input.x += joystickInput.x;
+                input.z += joystickInput.y;
                 
                 const legL = robotGroup.userData.legL;
                 const legR = robotGroup.userData.legR;
